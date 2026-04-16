@@ -17,6 +17,7 @@ app.add_middleware(
 # Connect modularized upload pipeline securely
 app.include_router(upload.router)
 
+# trigger uvicorn reload correctly now that packages are successfully installed
 @app.get("/")
 def health_check():
     """ Verify server binds and connectivity natively. """

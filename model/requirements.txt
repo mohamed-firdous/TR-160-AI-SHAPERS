@@ -3,5 +3,9 @@ transformers
 torch
 pdfminer.six
 python-docx
-scikit-learn
-numpy
+duckduckgo-search
+beautifulsoup4
+requests
+trafilatura
+newspaper3k
+lxml_html_clean

@@ -28,7 +28,8 @@ const UploadPage = ({ onAnalysisComplete }) => {
       const result = await uploadFile(selectedFile);
       onAnalysisComplete(result);
     } catch (err) {
-      setError("Failed to connect to the backend API. Ensure the server is running.");
+      const dynamicError = err.response?.data?.detail || err.message || "Failed to connect to backend.";
+      setError(`Server Error: ${dynamicError}`);
       setIsLoading(false);
     }
   };
