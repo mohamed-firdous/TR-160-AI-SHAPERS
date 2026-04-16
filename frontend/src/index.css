@@ -3,7 +3,7 @@
 @theme {
   --color-risk-low: #22c55e;
   --color-risk-medium: #eab308;
-  --color-risk-high: #ef4444;
+  --color-risk-high: #ef4444; 
 }
 
 body {

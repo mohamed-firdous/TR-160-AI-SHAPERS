@@ -1,0 +1,27 @@
+USER
+                 │
+                 ▼
+        Frontend (React UI)
+     upload document + show results
+                 │
+                 ▼
+        Backend API (FastAPI)
+      handles request & response
+                 │
+                 ▼
+        AI Processing Engine
+    text processing + prediction
+        │                │
+        ▼                ▼
+Sentence Transformer     GPT2 Model
+(plagiarism detection)   (AI detection)
+        │                │
+        └──────┬─────────┘
+               ▼
+        Score Aggregation
+               │
+               ▼
+           JSON Output
+               │
+               ▼
+        Frontend Dashboard
