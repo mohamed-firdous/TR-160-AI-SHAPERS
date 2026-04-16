@@ -23,7 +23,7 @@ if ROOT_DIR not in sys.path:
 # now safe to import natively recognizing the model module
 from model.analyze_document import analyze_document
 
-def run_analysis(file_path: str):
+async def run_analysis(file_path: str):
     """
     Executes the AI model pipeline.
 
@@ -34,7 +34,7 @@ def run_analysis(file_path: str):
     """
 
     try:
-        result = analyze_document(file_path)
+        result = await analyze_document(file_path)
         return result
 
     except Exception as e:

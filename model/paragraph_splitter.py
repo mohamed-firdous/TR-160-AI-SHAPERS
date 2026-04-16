@@ -1,23 +1,25 @@
+import re
+
 def split_into_paragraphs(text):
     """
-    Splits a raw text body into discrete paragraphs using newline characters.
-    It filters out completely empty lines and sentences that possess fewer than 40 characters.
-    
-    Returns:
-        List of cleaned paragraph strings.
+    Robust paragraph splitter that identifies breaks using multiple newline variations.
+    Handles \n\n, \r\n\r\n, and multiple consecutive whitespace line breaks.
     """
     if not text:
         return []
 
-    # Split text line-by-line primarily separating blocks based on newlines 
-    raw_paragraphs = text.split('\n')
+    # 1. Normalize line endings and split by double-newline or more
+    blocks = re.split(r'\n\s*\n|\r\n\s*\r\n', text)
     
     cleaned_paragraphs = []
-    
-    for p in raw_paragraphs:
-        cleaned = p.strip()
-        # Keep paragraph if it has 40 or more characters and is not purely whitespace
-        if len(cleaned) >= 40:
-            cleaned_paragraphs.append(cleaned)
-            
+    for b in blocks:
+        cleaned = b.strip()
+        if cleaned:
+            # Fallback for greedy PDF extractions: split on lines ending in terminal punct
+            sub_splits = re.split(r'(?<=[.!?])\n', cleaned)
+            for s in sub_splits:
+                s_cleaned = s.strip()
+                if len(s_cleaned) >= 1:
+                    cleaned_paragraphs.append(s_cleaned)
+                    
     return cleaned_paragraphs

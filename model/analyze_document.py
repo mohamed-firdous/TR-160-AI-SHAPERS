@@ -13,21 +13,15 @@ except ImportError:
     from plagiarism_model import compute_plagiarism_score
     from ai_detector import compute_ai_probability
 
-def _process_paragraph(p):
-    """
-    Independent functional worker explicitly designed for massive asynchronous Parallel Threading.
-    """
-    p_score = compute_plagiarism_score(p)
-    a_score = compute_ai_probability(p)
-    return {
-        "paragraph": p,
-        "plagiarism_score": p_score,
-        "ai_probability": a_score
-    }
+import asyncio
 
-def analyze_document(file_path):
+async def analyze_document(file_path):
     """
-    Enhanced analysis pipeline with robust paragraph chunking and aggregation.
+    HIGH-PERFORMANCE ACCURACY PIPELINE
+    - Sync extraction (local)
+    - Paragraph grouping for AI context
+    - Async parallel inference
+    - Selective Web Search
     """
     if not os.path.exists(file_path):
         return {"error": "File not found"}
@@ -49,63 +43,108 @@ def analyze_document(file_path):
     if not raw_text.strip():
         return {"error": "No extractable text found"}
         
-    # 2. Preprocessing & Robust Chunking
-    raw_paragraphs = split_into_paragraphs(raw_text)
+    paragraphs = split_into_paragraphs(raw_text)
+    if not paragraphs and raw_text.strip():
+        paragraphs = [raw_text.strip()]
     
-    # Filter paragraphs shorter than 40 words
-    filtered_p = [p for p in raw_paragraphs if len(p.split()) >= 40]
-    
-    if not filtered_p:
-        return {"error": "No significant text found (paragraphs too short)"}
-
-    # Chunking: Ensure chunks are between 120-350 words
-    processed_paragraphs = []
-    current_chunk = []
-    current_count = 0
-    
-    for p in filtered_p:
-        count = len(p.split())
-        if current_count + count > 350 and current_chunk:
-            processed_paragraphs.append(" ".join(current_chunk))
-            current_chunk = [p]
-            current_count = count
-        else:
-            current_chunk.append(p)
-            current_count += count
-            if current_count >= 120:
-                processed_paragraphs.append(" ".join(current_chunk))
-                current_chunk = []
-                current_count = 0
-    
-    if current_chunk:
-        processed_paragraphs.append(" ".join(current_chunk))
-
-    if not processed_paragraphs:
-        return {"error": "Could not form valid analysis chunks"}
+    if not paragraphs:
+        return {"error": "No extractable text found."}
         
-    # 3. Parallel Inference
-    paragraph_analysis = []
-    with concurrent.futures.ThreadPoolExecutor(max_workers=3) as executor:
-        results = list(executor.map(_process_paragraph, processed_paragraphs))
-        paragraph_analysis.extend(results)
+    # --- PERFORMANCE OPTIMIZATION: SELECTIVE PLAGIARISM SEARCH ---
+    search_candidates = []
+    for i, p in enumerate(paragraphs):
+        word_count = len(p.split())
+        if word_count >= 40:
+            search_candidates.append({"index": i, "text": p, "length": word_count})
+    
+    search_candidates.sort(key=lambda x: x["length"], reverse=True)
+    top_5_indices = {c["index"] for c in search_candidates[:5]}
 
-    # 4. Global Structural Aggregation
-    ai_scores = [item["ai_probability"] for item in paragraph_analysis]
+    # --- ACCURACY OPTIMIZATION: PARAGRAPH RE-CHUNKING FOR AI ---
+    # Requirement 2: Combine adjacent paragraphs for 150-400 word chunks
+    chunks = []
+    current_chunk_indices = []
+    current_chunk_text = ""
+    current_chunk_words = 0
+
+    for i, p in enumerate(paragraphs):
+        p_words = len(p.split())
+        if current_chunk_words + p_words > 400 and current_chunk_words >= 150:
+            # Seal current chunk
+            chunks.append({"indices": current_chunk_indices, "text": current_chunk_text.strip()})
+            current_chunk_indices = [i]
+            current_chunk_text = p
+            current_chunk_words = p_words
+        else:
+            current_chunk_indices.append(i)
+            current_chunk_text += "\n" + p
+            current_chunk_words += p_words
+            
+    if current_chunk_indices:
+        chunks.append({"indices": current_chunk_indices, "text": current_chunk_text.strip()})
+
+    # --- PARALLEL ORCHESTRATION ---
+    # Phase A: Plagiarism Tasks (Paragraph-level)
+    plag_tasks = []
+    for i, p in enumerate(paragraphs):
+        skip = (i not in top_5_indices)
+        plag_tasks.append(compute_plagiarism_score(p, skip_search=skip))
+        
+    # Phase B: AI Tasks (Chunk-level - Requirement 2)
+    ai_tasks = [compute_ai_probability(c["text"]) for c in chunks]
+
+    # Execute all
+    plag_results, ai_results = await asyncio.gather(
+        asyncio.gather(*plag_tasks),
+        asyncio.gather(*ai_tasks)
+    )
+
+    # RE-ASSEMBLE RESULTS
+    paragraph_analysis = []
+    for i, p in enumerate(paragraphs):
+        # Find which AI result matches this paragraph
+        ai_prob = 0.0
+        for chunk_idx, chunk_meta in enumerate(chunks):
+            if i in chunk_meta["indices"]:
+                ai_prob = ai_results[chunk_idx]
+                break
+        
+        p_score = plag_results[i]
+        
+        # Requirement 3: Only reduce AI probability if plagiarism similarity > 92%
+        # Graduation: Reduce by 90% instead of hard-kill to allow for 10-30% range on Wiki
+        if p_score > 92.0:
+            ai_prob *= 0.1
+            
+        paragraph_analysis.append({
+            "paragraph": p,
+            "plagiarism_score": p_score,
+            "ai_probability": ai_prob,
+            "search_performed": (i in top_5_indices)
+        })
+
+    # --- GLOBAL AGGREGATION ---
+    # Requirement 3 refinement: Use 92% threshold for filter
+    ai_scores = [item["ai_probability"] for item in paragraph_analysis if item["plagiarism_score"] <= 92.0]
     plag_scores = [item["plagiarism_score"] for item in paragraph_analysis]
     
     if ai_scores:
-        # AI score = mean of top 40% highest AI paragraph scores
         ai_scores.sort(reverse=True)
         top_k = max(1, int(len(ai_scores) * 0.40))
-        overall_ai = round(sum(ai_scores[:top_k]) / top_k, 2)
+        overall_ai = sum(ai_scores[:top_k]) / top_k
     else:
         overall_ai = 0.0
         
-    if plag_scores:
-        # Plagiarism score = max similarity across paragraphs
-        overall_plag = round(max(plag_scores), 2)
-    else:
-        overall_plag = 0.0
+    overall_plag = max(plag_scores) if plag_scores else 0.0
+    
+    overall_plag = round(max(0, min(100, overall_plag)), 1)
+    overall_ai = round(max(0, min(100, overall_ai)), 1)
+    
+    for item in paragraph_analysis:
+        item["plagiarism_score"] = round(item["plagiarism_score"], 1)
+        item["ai_probability"] = round(item["ai_probability"], 1)
+        
+    print(f"\n>>> FINAL PERFORMANCE BROADCAST -> AI: {overall_ai}%, Plag: {overall_plag}%")
     
     return {
         "overall_plagiarism_score": overall_plag,

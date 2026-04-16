@@ -29,11 +29,11 @@ const ResultsPage = ({ result, onReset }) => {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full mb-12">
          <ScoreCard 
            title="Overall Plagiarism" 
-           score={Math.round(result.overall_plagiarism_score * 100)} 
+           score={Math.round(result.overall_plagiarism_score)} 
          />
          <ScoreCard 
            title="Overall AI Probability" 
-           score={Math.round(result.overall_ai_probability * 100)} 
+           score={Math.round(result.overall_ai_probability)} 
          />
       </div>
 
@@ -50,8 +50,8 @@ const ResultsPage = ({ result, onReset }) => {
                index={index}
                paragraph={{
                  ...item,
-                 plagiarism_score: Math.round(item.plagiarism_score * 100),
-                 ai_probability: Math.round(item.ai_probability * 100)
+                 plagiarism_score: Math.round(item.plagiarism_score),
+                 ai_probability: Math.round(item.ai_probability)
                }}
              />
           ))}
