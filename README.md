@@ -1,5 +1,56 @@
 # Automated Academic Plagiarism & AI-Generated Content Detector
 
+Hackathon-ready MVP built with React (Vite + Tailwind) and FastAPI.
+
+## Features
+
+- Upload PDF, DOCX, and TXT assignments
+- Clean text extraction and paragraph segmentation
+- Paragraph-level plagiarism scoring via sentence embeddings + cosine similarity
+- Paragraph-level AI-content probability via stylometric/perplexity-proxy signals
+- Confidence labels and red/yellow/green evidence heatmap
+- Faculty-facing PDF report download
+
+## Project Structure
+
+- `frontend/` React dashboard
+- `backend/` FastAPI API and ML services
+
+## Run Backend
+
+```bash
+cd backend
+pip install -r requirements.txt
+uvicorn main:app --reload --host 127.0.0.1 --port 8000
+```
+
+## Run Frontend
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+## API Contract
+
+`POST /analyze` (multipart form data)
+
+- `file`: required (`.pdf`, `.docx`, `.txt`)
+- `custom_reference`: optional newline-separated references
+
+Response shape:
+
+- `filename`: string
+- `summary`: paragraph_count, avg_plagiarism, avg_ai_probability, high_risk_sections
+- `paragraphs`: list of paragraph-level scores and evidence
+- `pdf_report_base64`: downloadable faculty report payload
+
+## Performance Target
+
+- Designed for under-20-second analysis on typical assignment sizes (depends on hardware and embedding model cold start).
+# Automated Academic Plagiarism & AI-Generated Content Detector
+
 A hackathon-ready Streamlit MVP that analyzes student submissions (PDF, DOCX, TXT) for:
 - Paragraph-level plagiarism risk (semantic similarity + sentence embeddings)
 - Paragraph-level AI-generation probability (stylometric heuristic)

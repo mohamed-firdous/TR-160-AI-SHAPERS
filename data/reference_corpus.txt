@@ -1,6 +1,0 @@
-Academic integrity policy states all sources must be cited using institution-approved style guidelines.
-Machine learning assignments often require documenting dataset origin, preprocessing steps, and validation strategy.
-A robust literature review synthesizes peer-reviewed sources and clearly separates evidence from opinion.
-Statistical significance should be reported alongside effect size and confidence intervals.
-Research methodology sections typically describe sample selection, instrumentation, and data collection limits.
-Educational institutions emphasize originality, proper attribution, and transparent collaboration boundaries.

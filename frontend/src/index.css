@@ -1,0 +1,31 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  font-family: "Space Grotesk", "Segoe UI", sans-serif;
+  color: #e2e8f0;
+  background:
+    radial-gradient(circle at 10% 10%, rgba(45, 212, 191, 0.15), transparent 35%),
+    radial-gradient(circle at 90% 15%, rgba(251, 191, 36, 0.14), transparent 35%),
+    linear-gradient(180deg, #020617 0%, #0f172a 100%);
+  min-height: 100vh;
+}
+
+.loading-bar {
+  animation: loading-slide 1.4s ease-in-out infinite;
+}
+
+@keyframes loading-slide {
+  0% {
+    transform: translateX(-120%);
+    opacity: 0.2;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(260%);
+    opacity: 0.2;
+  }
+}
