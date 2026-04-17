@@ -4,6 +4,37 @@ import ParagraphCard from '../components/ParagraphCard';
 import { ArrowLeft, Download } from 'lucide-react';
 
 const ResultsPage = ({ result, onReset }) => {
+  const [isExporting, setIsExporting] = React.useState(false);
+
+  const handleExportPDF = async () => {
+    try {
+      setIsExporting(true);
+      const response = await fetch('http://localhost:8000/export-report', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(result),
+      });
+
+      if (!response.ok) throw new Error('Failed to generate report');
+
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'analysis_report.pdf';
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Export error:', error);
+      alert('Failed to generate PDF report. Please try again.');
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
   return (
     <div className="w-full flex flex-col items-center">
       <div className="w-full flex justify-between items-center mb-8">
@@ -16,13 +47,12 @@ const ResultsPage = ({ result, onReset }) => {
         </button>
 
         <button 
-          className="flex items-center space-x-2 text-white bg-indigo-600 hover:bg-indigo-700 px-6 py-3 rounded-xl font-bold transition-all shadow-lg hover:shadow-indigo-500/30 transform hover:-translate-y-0.5"
-          onClick={() => {
-            alert("Report Export functionality would be triggered here!");
-          }}
+          className={`flex items-center space-x-2 text-white bg-indigo-600 hover:bg-indigo-700 px-6 py-3 rounded-xl font-bold transition-all shadow-lg hover:shadow-indigo-500/30 transform hover:-translate-y-0.5 ${isExporting ? 'opacity-70 cursor-not-allowed' : ''}`}
+          onClick={handleExportPDF}
+          disabled={isExporting}
         >
           <Download className="w-5 h-5" />
-          <span>Export PDF</span>
+          <span>{isExporting ? 'Generating...' : 'Export PDF'}</span>
         </button>
       </div>
 

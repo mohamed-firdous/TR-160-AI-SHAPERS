@@ -30,7 +30,7 @@ const ScoreCard = ({ title, score }) => {
     <div className={`flex flex-col items-center justify-center p-8 rounded-[2rem] border ${borderClass} ${bgClass} shadow-sm relative overflow-hidden transition-all hover:shadow-md`}>
       <h3 className="text-xl font-bold text-slate-800 mb-6">{title}</h3>
       
-      <div className="relative flex items-center justify-center w-36 h-36 mb-6">
+      <div className="relative w-36 h-36 mb-6 flex items-center justify-center">
         <svg className="absolute w-full h-full transform -rotate-90 drop-shadow-sm">
           <circle
             cx="72"
@@ -57,8 +57,10 @@ const ScoreCard = ({ title, score }) => {
             className={colorClass}
           />
         </svg>
-        <div className="absolute flex flex-col items-center justify-center text-center">
-          <span className={`text-4xl font-black ${colorClass} drop-shadow-sm`}>{score}%</span>
+        <div className="flex flex-col items-center justify-center z-10">
+          <span className={`text-4xl font-black ${colorClass} drop-shadow-sm leading-none`}>
+            {score}%
+          </span>
         </div>
       </div>
       
