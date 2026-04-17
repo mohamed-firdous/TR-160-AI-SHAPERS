@@ -65,3 +65,9 @@ Default local URLs:
 ## Development Tips
 - Keep backend and frontend running in separate terminals.
 - Use backend requirements in backend/requirements.txt and model requirements in model/requirements.txt for module-scoped installs, or use the root requirements.txt for a single environment install.
+
+## Author
+- MOHAMMED FIRDOUS S
+- SAI NITHICK ROSHAAN S
+- RAVIN S
+- PRADEEP M
