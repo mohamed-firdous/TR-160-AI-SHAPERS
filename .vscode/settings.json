@@ -1,7 +1,0 @@
-{
-    "css.lint.unknownAtRules": "ignore",
-    "python.analysis.extraPaths": [
-        "./model",
-        "./backend"
-    ]
-}
